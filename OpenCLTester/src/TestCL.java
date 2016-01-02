@@ -3,6 +3,7 @@
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
+import java.util.Random;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
@@ -20,7 +21,9 @@ import org.lwjgl.opencl.Util;
 
 public class TestCL {
 	
-	private static final int SIZE = 100000000;
+	private static final int SIZE = 10000000; //Total number of test elements
+	
+	private static final int SEL = new Random().nextInt(SIZE); //Random element to check
 	
 	private static CLContext context; //CL Context
 	private static CLPlatform platform; //CL platform
@@ -34,7 +37,7 @@ public class TestCL {
 	private static String kernel = "kernel void sum(global const float* a, global const float* b, global float* result, int const size){\n" + 
 			"const int itemId = get_global_id(0);\n" + 
 			"if(itemId < size){\n" + 
-			"result[itemId] = a[itemId] + b[itemId];\n" +
+			"result[itemId] = sin(a[itemId]) * cos(b[itemId]);\n" +
 			"}\n" +
 			"}";;
 	
@@ -51,7 +54,7 @@ public class TestCL {
 		}
 		
 		try {
-			testCPU(); //How long does it take running in traditional Java code on the CPU?
+			//testCPU(); //How long does it take running in traditional Java code on the CPU?
 			testGPU(); //How long does the GPU take to run it w/ CL?
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -65,10 +68,12 @@ public class TestCL {
 	private static void testCPU(){
 		long time = System.currentTimeMillis();
 		for(int i=0; i<SIZE; i++){
-			rData[i] = aData[i] + bData[i];
+			rData[i] = (float) (Math.sin(aData[i]) * Math.cos(bData[i]));
 		}
 		//Print the time FROM THE START OF THE testCPU() FUNCTION UNTIL NOW
 		System.out.println("CPU processing time for " + SIZE + " elements: " + (System.currentTimeMillis() - time));
+		//Print a random element from rData to test equality with the GPU's result
+		System.out.println("CPU result for element number " + SEL + ": " + rData[SEL]);
 	}
 	
 	/**
@@ -119,6 +124,8 @@ public class TestCL {
 		final int dim = 1;
 		PointerBuffer workSize = BufferUtils.createPointerBuffer(dim);
 		workSize.put(0, SIZE);
+//		workSize.put(1, 100);
+//		workSize.put(2, 1000);
 		
 		//Actually running the program
 		CL10.clEnqueueNDRangeKernel(queue, sum, dim, null, workSize, null, null, null);
@@ -131,6 +138,8 @@ public class TestCL {
 		//How long did it take?
 		//Print the time FROM THE SETTING OF KERNEL ARGUMENTS UNTIL NOW
 		System.out.println("GPU processing time for " + SIZE + " elements: " + (System.currentTimeMillis() - time));
+		//Print a random element from res to check equality with the CPU's result
+		System.out.println("GPU result for element number " + SEL + ": " + res.get(SEL));
 		
 		//Cleanup objects
 		CL10.clReleaseKernel(sum);
