@@ -21,7 +21,7 @@ import org.lwjgl.opencl.Util;
 
 public class TestCL {
 	
-	private static final int SIZE = 10000000; //Total number of test elements
+	private static final int SIZE = 1000000; //Total number of test elements
 	
 	private static final int SEL = new Random().nextInt(SIZE); //Random element to check
 	
@@ -54,7 +54,7 @@ public class TestCL {
 		}
 		
 		try {
-			//testCPU(); //How long does it take running in traditional Java code on the CPU?
+			testCPU(); //How long does it take running in traditional Java code on the CPU?
 			testGPU(); //How long does the GPU take to run it w/ CL?
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
