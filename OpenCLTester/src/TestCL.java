@@ -23,6 +23,8 @@ public class TestCL {
 	
 	private static final int SIZE = 1000000; //Total number of test elements
 	
+	//IF YOU CAN SEE THSI COMMENT IT'S WORKING
+	
 	private static final int SEL = new Random().nextInt(SIZE); //Random element to check
 	
 	private static CLContext context; //CL Context
